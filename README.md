@@ -62,15 +62,8 @@ Once the application is running, you can use the sidebar to select different typ
 - **`data_fetching.py`**: Contains functions for fetching and processing data from the World Bank API (if separate).
 - **`plotting.py`**: Contains functions for plotting different types of charts (if separate).
 
-## Contributing
-
-If you would like to contribute to this project, please fork the repository and submit a pull request with your changes. For detailed information on contributing, refer to the [CONTRIBUTING.md](CONTRIBUTING.md) file.
-
-## License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 ## Contact
 
-For any questions or feedback, please open an issue or contact [your email](mailto:youremail@example.com).
+For any questions or feedback, please open an issue or contact abhinavkatiyan21@gmail.com
 
