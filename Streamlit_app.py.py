@@ -4,8 +4,6 @@ import pandas as pd
 import plotly.graph_objects as go
 import plotly.express as px
 
-
-# Predefined list of country codes and names
 COUNTRY_CODES = {
     'BRA': 'Brazil', 'RUS': 'Russia', 'IND': 'India', 'CHN': 'China', 'ZAF': 'South Africa',
     'USA': 'United States', 'GBR': 'United Kingdom', 'CAN': 'Canada', 'AUS': 'Australia',
@@ -56,7 +54,6 @@ GROUPS = {
 
 
 def fetch_data(indicator, years, countries):
-    """Fetches data for the specified indicator, year, and countries."""
     try:
         if isinstance(years, list):
             data = wb.data.DataFrame(indicator, economy=countries, time=years)
@@ -64,8 +61,6 @@ def fetch_data(indicator, years, countries):
         else:
             data = wb.data.DataFrame(indicator, economy=countries, time=f"YR{years}")
             global_data = wb.data.DataFrame(indicator, economy="WLD", time=f"YR{years}")
-
-        # Check if the data fetched is empty or not
         if data.empty:
             st.warning(f"No data found for indicator {indicator} for countries {countries} and years {years}.")
             return pd.DataFrame(), pd.DataFrame()
@@ -73,7 +68,6 @@ def fetch_data(indicator, years, countries):
             st.warning(f"No global data found for indicator {indicator} for years {years}.")
             return data, pd.DataFrame()
 
-        # Ensure 'economy' column is set as index if not already
         if 'economy' not in data.index.names:
             data = data.set_index('economy')
         if 'economy' not in global_data.index.names:
@@ -86,7 +80,6 @@ def fetch_data(indicator, years, countries):
         return pd.DataFrame(), pd.DataFrame()
 
 def plot_comparison(selected_code, data, global_data, metric_name, chart_type):
-    """Plots a comparison chart based on the selected chart type."""
     if selected_code in GROUPS:
         group_name = selected_code
         try:
@@ -116,9 +109,6 @@ def plot_comparison(selected_code, data, global_data, metric_name, chart_type):
         selected_value = data.loc[selected_code].values[0]
         world_value = global_data.loc['WLD'].values[0]
 
-
-
-        # Display warning if values are negative or zero
         if selected_value < 0 or world_value < 0:
             st.warning(f"Negative values detected for {metric_name}. Showing bar chart instead.")
             chart_type = 'bar'
@@ -163,7 +153,6 @@ def plot_country_vs_country(country_code_1, country_code_2, country_data_1, coun
     st.write("Data for Country 1:", country_data_1.head())
     st.write("Data for Country 2:", country_data_2.head())
 
-    # Determine if 'Country Code' is a column or index
     if 'Country Code' in country_data_1.columns:
         is_column = True
     else:
@@ -187,18 +176,15 @@ def plot_country_vs_country(country_code_1, country_code_2, country_data_1, coun
         data_1 = country_data_1.loc[country_code_1]
         data_2 = country_data_2.loc[country_code_2]
 
-    # Convert Series to DataFrame if necessary
     if isinstance(data_1, pd.Series):
         data_1 = data_1.to_frame().T
     if isinstance(data_2, pd.Series):
         data_2 = data_2.to_frame().T
 
-    # Ensure that data is not empty before proceeding
+
     if data_1.empty or data_2.empty:
         st.error("No data available for the selected countries.")
         return
-
-    # Extract relevant metrics for plotting
     years_1 = [col for col in data_1.columns if col.startswith('YR')]
     years_2 = [col for col in data_2.columns if col.startswith('YR')]
 
@@ -209,12 +195,10 @@ def plot_country_vs_country(country_code_1, country_code_2, country_data_1, coun
     values_1 = [data_1[year].values[0] for year in years_1]
     values_2 = [data_2[year].values[0] for year in years_2]
 
-    # Check if the length of years and values match
     if len(years_1) != len(values_1) or len(years_2) != len(values_2):
         st.error("Mismatch in the number of years and values.")
         return
 
-    # Plot data using Plotly
     import plotly.graph_objects as go
 
     fig = go.Figure()
@@ -237,25 +221,19 @@ def plot_country_vs_country(country_code_1, country_code_2, country_data_1, coun
 def plot_group_vs_group(group_name_1, group_name_2, data_1, data_2, metric_name, chart_type):
     st.write(f'Comparing {group_name_1} with {group_name_2} for {metric_name}')
 
-    # Convert fetched data to DataFrame for plotting
     data_1_df = pd.DataFrame(data_1)
     data_2_df = pd.DataFrame(data_2)
 
-    # Ensure data frames are properly aligned and have matching indices
     data_1_df = data_1_df.sort_index()
     data_2_df = data_2_df.sort_index()
-
-    # Add prefixes to column names to avoid duplicates
     data_1_df.columns = [f"{group_name_1}_{col}" for col in data_1_df.columns]
     data_2_df.columns = [f"{group_name_2}_{col}" for col in data_2_df.columns]
 
-    # Combine the data for plotting
     combined_data = pd.concat([data_1_df, data_2_df], axis=1)
 
-    # Remove any potential duplicate columns
+ 
     combined_data = combined_data.loc[:, ~combined_data.columns.duplicated()]
 
-    # Debugging: Display the data to ensure it looks correct
 
 
     # Plot based on chart type
@@ -317,7 +295,6 @@ def fetch_group_data(indicator, years, countries):
 
 
 def aggregate_group_data(group, indicator, year):
-    """Aggregates data for a group of countries."""
     # Ensure GROUPS is defined and contains the necessary data
     if group not in GROUPS:
         st.error(f"Group {group} is not defined in GROUPS.")
