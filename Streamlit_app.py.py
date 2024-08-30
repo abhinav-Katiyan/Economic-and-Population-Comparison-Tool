@@ -380,8 +380,8 @@ def fetch_group_data(indicator, years, countries):
 
 
 def plot_group_map(group_data, metric, group_name):
-    # Check if the DataFrame includes the necessary columns and adjust if needed
     try:
+        # Check if the DataFrame includes the necessary columns and adjust if needed
         if 'Country' not in group_data.columns:
             group_data = group_data.reset_index()
 
@@ -407,6 +407,12 @@ def plot_group_map(group_data, metric, group_name):
         )
 
         if view_option == "Map":
+            # Option to switch between 2D and 3D views
+            projection_type = st.radio(
+                "Select projection:",
+                ("2D", "3D")
+            )
+
             # Create the choropleth map
             fig = px.choropleth(
                 group_data,
@@ -420,19 +426,59 @@ def plot_group_map(group_data, metric, group_name):
                 projection='natural earth'
             )
 
-            # Update map layout for a modern look
-            fig.update_geos(
-                showcoastlines=True, coastlinecolor="Black", showland=True, landcolor="White",
-                showocean=True, oceancolor="LightBlue"
-            )
+            # Update map layout based on projection type
+            if projection_type == "3D":
+                fig.update_geos(
+                    showcoastlines=True,
+                    coastlinecolor="DarkGray",
+                    showland=True,
+                    landcolor="LightGray",
+                    showocean=True,
+                    oceancolor="DarkBlue",
+                    showlakes=True,
+                    lakecolor="LightSkyBlue",
+                    showrivers=True,
+                    rivercolor="Blue",
+                    showcountries=True,
+                    countrycolor="LightGray",
+                    projection=dict(
+                        type='orthographic',  # 3D projection type
+                        rotation=dict(lon=30, lat=10)  # Adjust rotation for better view
+                    )
+                )
+            else:
+                fig.update_geos(
+                    showcoastlines=True,
+                    coastlinecolor="DarkGray",
+                    showland=True,
+                    landcolor="LightGray",
+                    showocean=True,
+                    oceancolor="DarkBlue",
+                    showlakes=True,
+                    lakecolor="LightSkyBlue",
+                    showrivers=True,
+                    rivercolor="Blue",
+                    showcountries=True,
+                    countrycolor="LightGray"
+                )
+
+            # Update layout
             fig.update_layout(
-                geo=dict(bgcolor='rgba(0,0,0,0)', showland=True),
-                margin={"r": 0, "t": 30, "l": 0, "b": 0},
+                geo=dict(
+                    bgcolor='rgba(0,0,0,0)',  # Transparent background
+                    showland=True,
+                    showocean=True,
+                    showcoastlines=True,
+                    showrivers=True,
+                    showcountries=True
+                ),
+                margin={"r": 0, "t": 50, "l": 0, "b": 0},
                 title_font=dict(size=18, family='Arial', color='RebeccaPurple'),
-                height=600,  # Set the height of the map
-                width=800  # Set the width of the map
+                height=600,
+                width=1600
             )
 
+            # Display the map in Streamlit
             st.plotly_chart(fig, use_container_width=True)
 
         elif view_option == "Graph":
@@ -468,6 +514,7 @@ def plot_group_map(group_data, metric, group_name):
 
     except Exception as e:
         st.warning(f'Will Be Adding It Soon 🫡🫡')
+
 
 def aggregate_group_data(group, indicator, year):
     # Ensure GROUPS is defined and contains the necessary data
