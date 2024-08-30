@@ -330,7 +330,7 @@ def main():
     st.title('Economic and Population Comparison Tool')
 
     # Sidebar selection
-    analysis_type = st.sidebar.radio('Select Analysis Type', ['Country Comparison', 'Group Comparison', 'Country vs. Country', 'Group vs. Group'])
+    analysis_type = st.sidebar.radio('Select Analysis Type', ['Country Comparison', 'Country vs. Country', 'Group vs. Group'])
     chart_type = st.sidebar.selectbox('Select Chart Type:', ['bar', 'pie', 'line', 'scatter'])
 
     # User input for metric
