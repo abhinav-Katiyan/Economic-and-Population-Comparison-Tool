@@ -104,6 +104,13 @@ country_names = {
     'PRY': 'Paraguay', 'PER': 'Peru', 'URY': 'Uruguay', 'YEM': 'Yemen', 'JOR': 'Jordan', 'MAR': 'Morocco',
     'OMN': 'Oman', 'QAT': 'Qatar', 'SYR': 'Syria'
 }
+def fetch_per_capita_income(years, countries):
+    indicator = 'NY.GDP.PCAP.CD'  # World Bank indicator for Per Capita GDP
+    return fetch_data(indicator, years, countries)
+
+def fetch_inflation_data(years, countries):
+    indicator = 'FP.CPI.TOTL.ZG'  # World Bank indicator for Inflation
+    return fetch_data(indicator, years, countries)
 
 
 def fetch_data(indicator, years, countries):
@@ -295,63 +302,65 @@ def plot_country_vs_country(country_code_1, country_code_2, country_data_1, coun
 
 
 def plot_group_vs_group(group_name_1, group_name_2, data_1, data_2, metric_name, chart_type):
-    st.write(f'Comparing {group_name_1} with {group_name_2} for {metric_name}')
+    try:
+        st.write(f'Comparing {group_name_1} with {group_name_2} for {metric_name}')
 
-    data_1_df = pd.DataFrame(data_1)
-    data_2_df = pd.DataFrame(data_2)
+        data_1_df = pd.DataFrame(data_1)
+        data_2_df = pd.DataFrame(data_2)
 
-    data_1_df = data_1_df.sort_index()
-    data_2_df = data_2_df.sort_index()
-    data_1_df.columns = [f"{group_name_1}_{col}" for col in data_1_df.columns]
-    data_2_df.columns = [f"{group_name_2}_{col}" for col in data_2_df.columns]
+        data_1_df = data_1_df.sort_index()
+        data_2_df = data_2_df.sort_index()
+        data_1_df.columns = [f"{group_name_1}_{col}" for col in data_1_df.columns]
+        data_2_df.columns = [f"{group_name_2}_{col}" for col in data_2_df.columns]
 
-    combined_data = pd.concat([data_1_df, data_2_df], axis=1)
+        combined_data = pd.concat([data_1_df, data_2_df], axis=1)
 
-    combined_data = combined_data.loc[:, ~combined_data.columns.duplicated()]
+        combined_data = combined_data.loc[:, ~combined_data.columns.duplicated()]
 
-    # Plot based on chart type
-    if chart_type == 'line':
-        st.line_chart(combined_data)
-    elif chart_type == 'bar':
-        # Grouped bar chart
-        fig = go.Figure()
+        # Plot based on chart type
+        if chart_type == 'line':
+            st.line_chart(combined_data)
+        elif chart_type == 'bar':
+            # Grouped bar chart
+            fig = go.Figure()
 
-        # Add bars for each group
-        for col in combined_data.columns:
-            group_name = col.split('_')[0]  # Extract group name
-            fig.add_trace(go.Bar(
-                x=combined_data.index,
-                y=combined_data[col],
-                name=col,
-                marker=dict(line=dict(width=1.5, color='black'))
-            ))
+            # Add bars for each group
+            for col in combined_data.columns:
+                group_name = col.split('_')[0]  # Extract group name
+                fig.add_trace(go.Bar(
+                    x=combined_data.index,
+                    y=combined_data[col],
+                    name=col,
+                    marker=dict(line=dict(width=1.5, color='black'))
+                ))
 
-        fig.update_layout(
-            title=f'{metric_name} Comparison',
-            xaxis_title='Year',
-            yaxis_title=metric_name,
-            barmode='group',  # Grouped bar chart
-            xaxis_tickangle=-45,  # Angle x-axis labels for readability
-            legend_title='Groups'
-        )
+            fig.update_layout(
+                title=f'{metric_name} Comparison',
+                xaxis_title='Year',
+                yaxis_title=metric_name,
+                barmode='group',  # Grouped bar chart
+                xaxis_tickangle=-45,  # Angle x-axis labels for readability
+                legend_title='Groups'
+            )
 
-        st.plotly_chart(fig)
-    elif chart_type == 'histogram':
-        fig = go.Figure()
-        for col in combined_data.columns:
-            fig.add_trace(go.Histogram(x=combined_data[col], name=col))
-        fig.update_layout(title=f'{metric_name} Comparison',
-                          xaxis_title=metric_name,
-                          yaxis_title='Frequency')
-        st.plotly_chart(fig)
-    elif chart_type == 'pie':
-        # Aggregated data for pie chart
-        data_sum = combined_data.sum()
-        fig = px.pie(values=data_sum, names=data_sum.index, title=f'{metric_name} Comparison')
-        st.plotly_chart(fig)
-    else:
-        st.error("Unsupported chart type")
-
+            st.plotly_chart(fig)
+        elif chart_type == 'histogram':
+            fig = go.Figure()
+            for col in combined_data.columns:
+                fig.add_trace(go.Histogram(x=combined_data[col], name=col))
+            fig.update_layout(title=f'{metric_name} Comparison',
+                              xaxis_title=metric_name,
+                              yaxis_title='Frequency')
+            st.plotly_chart(fig)
+        elif chart_type == 'pie':
+            # Aggregated data for pie chart
+            data_sum = combined_data.sum()
+            fig = px.pie(values=data_sum, names=data_sum.index, title=f'{metric_name} Comparison')
+            st.plotly_chart(fig)
+        else:
+            st.error("Unsupported chart type")
+    except:
+        st.warning('Working on it 🫡🫡')
 
 def fetch_data(indicator, years, countries):
     if isinstance(years, list):
@@ -366,6 +375,9 @@ def fetch_data(indicator, years, countries):
 
 def fetch_group_data(indicator, years, countries):
     return wb.data.DataFrame(indicator, economy=countries, time=years)
+
+
+
 
 def plot_group_map(group_data, metric, group_name):
     # Check if the DataFrame includes the necessary columns and adjust if needed
@@ -489,33 +501,34 @@ def aggregate_group_data(group, indicator, year):
         return pd.Series(dtype=float)
 
 linkedin='https://www.linkedin.com/in/abhinav-sharma-work21/'
+
+
 def main():
     st.title('Global Economic and Population Metrics Analyzer')
 
     contact_message = (
         '''Encountering issues with data accuracy or missing information? 
             Please reach out for support via [LinkedIn]({linkedin}).
-            'We appreciate your feedback to improve our tool!'''
-        )
+            We appreciate your feedback to improve our tool!'''
+    )
     st.caption(contact_message)
-
-
 
     # Sidebar selection
     analysis_type = st.sidebar.radio('Select Analysis Type',
                                      ['Country Comparison', 'Group Comparison', 'Country vs. Country',
                                       'Group vs. Group'])
-    chart_type = st.sidebar.selectbox('Select Chart Type:', ['bar', 'pie', 'line', 'scatter'])
+    chart_type = st.sidebar.selectbox('Select Chart Type:', ['bar', 'pie', 'line'])
 
     # User input for metric
-    metric = st.sidebar.selectbox('Select Metric:', ['Population', 'GDP', 'GDP Growth Rate'])
+    metric = st.sidebar.selectbox('Select Metric:', ['Population', 'GDP', 'GDP Growth Rate', 'Per Capita Income', 'Inflation'])
 
     # Map metric names to World Bank API indicators
     metric_indicators = {
         'Population': 'SP.POP.TOTL',
         'GDP': 'NY.GDP.MKTP.CD',
-        'Inflation': 'FP.CPI.TOTL',
-        'GDP Growth Rate': 'NY.GDP.MKTP.KD.ZG'
+        'Inflation': 'FP.CPI.TOTL.ZG',
+        'GDP Growth Rate': 'NY.GDP.MKTP.KD.ZG',
+        'Per Capita Income': 'NY.GDP.PCAP.CD'
     }
     selected_indicator = metric_indicators[metric]
 
@@ -525,15 +538,20 @@ def main():
         group_countries = GROUPS[selected_group_name]
         year = st.sidebar.selectbox('Select Year:', list(range(1990, 2024)))
 
-        group_data, _ = fetch_data(selected_indicator, year, group_countries)
+        if metric in ['Per Capita Income', 'Inflation']:
+            if metric == 'Per Capita Income':
+                group_data, _ = fetch_per_capita_income(year, group_countries)
+            else:
+                group_data, _ = fetch_inflation_data(year, group_countries)
+        else:
+            group_data, _ = fetch_data(selected_indicator, year, group_countries)
 
-        # st.subheader(f'{metric} Distribution in {selected_group_name}')
+        st.subheader(f'{metric} Distribution in {selected_group_name}')
         plot_group_comparison1(selected_group_name, group_data, metric)
 
         # Display map for group data
         st.subheader(f'Map of {metric} Distribution in {selected_group_name}')
         plot_group_map(group_data, metric, selected_group_name)
-
 
     elif analysis_type == 'Country Comparison':
         # Country comparison
@@ -569,15 +587,26 @@ def main():
         selected_group_name_2 = st.sidebar.selectbox('Select Second Group:', list(GROUPS.keys()))
         year_range = st.sidebar.slider('Select Year Range:', 1990, 2023, (2020, 2023))
 
-        group_data_1 = fetch_group_data(selected_indicator, list(range(year_range[0], year_range[1] + 1)),
-                                        GROUPS[selected_group_name_1])
-        group_data_2 = fetch_group_data(selected_indicator, list(range(year_range[0], year_range[1] + 1)),
-                                        GROUPS[selected_group_name_2])
+        if metric in ['Per Capita Income', 'Inflation']:
+            if metric == 'Per Capita Income':
+                group_data_1 = fetch_per_capita_income(list(range(year_range[0], year_range[1] + 1)),
+                                                        GROUPS[selected_group_name_1])
+                group_data_2 = fetch_per_capita_income(list(range(year_range[0], year_range[1] + 1)),
+                                                        GROUPS[selected_group_name_2])
+            else:
+                group_data_1 = fetch_inflation_data(list(range(year_range[0], year_range[1] + 1)),
+                                                     GROUPS[selected_group_name_1])
+                group_data_2 = fetch_inflation_data(list(range(year_range[0], year_range[1] + 1)),
+                                                     GROUPS[selected_group_name_2])
+        else:
+            group_data_1 = fetch_group_data(selected_indicator, list(range(year_range[0], year_range[1] + 1)),
+                                            GROUPS[selected_group_name_1])
+            group_data_2 = fetch_group_data(selected_indicator, list(range(year_range[0], year_range[1] + 1)),
+                                            GROUPS[selected_group_name_2])
 
         st.subheader(f'{metric} Comparison between {selected_group_name_1} and {selected_group_name_2}')
         plot_group_vs_group(selected_group_name_1, selected_group_name_2, group_data_1, group_data_2, metric,
                             chart_type)
-
 
 if __name__ == "__main__":
     main()
