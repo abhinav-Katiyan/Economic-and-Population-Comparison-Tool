@@ -367,93 +367,6 @@ def fetch_data(indicator, years, countries):
 def fetch_group_data(indicator, years, countries):
     return wb.data.DataFrame(indicator, economy=countries, time=years)
 
-
-# def plot_group_map(group_data, metric, group_name):
-#     # Check if the DataFrame includes the necessary columns and adjust if needed
-#     try:
-#         if 'Country' not in group_data.columns:
-#             group_data = group_data.reset_index()
-#
-#         if 'economy' in group_data.columns:
-#             group_data = group_data.rename(columns={'economy': 'Country'})
-#
-#         # Check if the metric column exists
-#         metric_column = metric if metric in group_data.columns else 'SP.POP.TOTL'
-#
-#         # Ensure the DataFrame has valid data
-#         if group_data.empty:
-#             st.error("No data available to display on the map.")
-#             return
-#
-#         if group_data[metric_column].isnull().all():
-#             st.warning(f"No valid data for {metric} in the selected group.")
-#             return
-#
-#         # Option to switch between map and global view
-#         view_option = st.radio(
-#             "Select view:",
-#             ("Map", "Graph")
-#         )
-#
-#         if view_option == "Map":
-#             # Create the choropleth map
-#             fig = px.choropleth(
-#                 group_data,
-#                 locations='Country',
-#                 locationmode='ISO-3',  # Use ISO-3 country codes
-#                 color=metric_column,
-#                 hover_name='Country',
-#                 title=f'{metric} Distribution in {group_name}',
-#                 color_continuous_scale='Viridis',
-#                 labels={metric_column: metric},
-#                 projection='natural earth'
-#             )
-#
-#             # Update map layout for a modern look
-#             fig.update_geos(
-#                 showcoastlines=True, coastlinecolor="Black", showland=True, landcolor="White",
-#                 showocean=True, oceancolor="LightBlue"
-#             )
-#             fig.update_layout(
-#                 geo=dict(bgcolor='rgba(0,0,0,0)', showland=True),
-#                 margin={"r": 0, "t": 30, "l": 0, "b": 0},
-#                 title_font=dict(size=18, family='Arial', color='RebeccaPurple'),
-#                 height=600,  # Set the height of the map
-#                 width=800  # Set the width of the map
-#             )
-#
-#             st.plotly_chart(fig, use_container_width=True)
-#
-#         elif view_option == "Graph":
-#             # Create a global view with a bar chart
-#             fig = px.bar(
-#                 group_data,
-#                 x='Country',
-#                 y=metric_column,
-#                 title=f'{metric} by Country',
-#                 color=metric_column,
-#                 color_continuous_scale='Viridis',
-#                 labels={metric_column: metric}
-#             )
-#
-#             fig.update_layout(
-#                 xaxis_title='Country',
-#                 yaxis_title=metric,
-#                 title_font=dict(size=18, family='Arial', color='RebeccaPurple'),
-#                 height=600,  # Set the height of the chart
-#                 width=800  # Set the width of the chart
-#             )
-#
-#             st.plotly_chart(fig, use_container_width=True)
-#             # Display country codes and names below the map or global chart
-#             country_info = '\n'.join(
-#                 [f"- **{code}**: {country_names.get(code, 'Unknown')}" for code in group_data['Country']])
-#             st.write("### Country Codes and Names")
-#             st.markdown(country_info)
-#
-#     except Exception as e:
-#         st.warning(f'Will Be Adding  Soon 🫡🫡')
-
 def plot_group_map(group_data, metric, group_name):
     # Check if the DataFrame includes the necessary columns and adjust if needed
     try:
@@ -575,9 +488,18 @@ def aggregate_group_data(group, indicator, year):
         st.error(f"Error during aggregation: {e}")
         return pd.Series(dtype=float)
 
-
+linkedin='https://www.linkedin.com/in/abhinav-sharma-work21/'
 def main():
-    st.title('Economic and Population Comparison Tool')
+    st.title('Global Economic and Population Metrics Analyzer')
+
+    contact_message = (
+        '''Encountering issues with data accuracy or missing information? 
+            Please reach out for support via [LinkedIn]({linkedin}).
+            'We appreciate your feedback to improve our tool!'''
+        )
+    st.caption(contact_message)
+
+
 
     # Sidebar selection
     analysis_type = st.sidebar.radio('Select Analysis Type',
