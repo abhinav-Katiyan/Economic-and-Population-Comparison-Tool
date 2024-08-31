@@ -551,7 +551,7 @@ def aggregate_group_data(group, indicator, year):
         st.error(f"Error during aggregation: {e}")
         return pd.Series(dtype=float)
 
-linkedin='https://www.linkedin.com/in/abhinav-sharma-work21/'
+linkedin='https://www.linkedin.com/in/abhinav-sharma-work21'
 
 
 def main():
