@@ -105,14 +105,9 @@ country_names = {
     'OMN': 'Oman', 'QAT': 'Qatar', 'SYR': 'Syria'
 }
 
-if 'visitor_count' not in st.session_state:
-    st.session_state['visitor_count'] = 0
 
-# Increment the visitor counter
-st.session_state['visitor_count'] += 4
 
-# Display the visitor count
-st.write(f"Number of visitors in this session: {st.session_state['visitor_count']}")
+
 def fetch_per_capita_income(years, countries):
     indicator = 'NY.GDP.PCAP.CD'  # World Bank indicator for Per Capita GDP
     return fetch_data(indicator, years, countries)
