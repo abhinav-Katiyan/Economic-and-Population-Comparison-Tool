@@ -551,14 +551,15 @@ def aggregate_group_data(group, indicator, year):
         st.error(f"Error during aggregation: {e}")
         return pd.Series(dtype=float)
 
-linkedin='https://www.linkedin.com/in/abhinav-sharma-work21'
 
 
 def main():
     st.title('Global Economic and Population Metrics Analyzer')
 
+    linkedin = 'https://www.linkedin.com/in/abhinav-sharma-work21'
+    
     contact_message = (
-        '''Encountering issues with data accuracy or missing information? 
+        f'''Encountering issues with data accuracy or missing information? 
             Please reach out for support via [LinkedIn]({linkedin}).
             We appreciate your feedback to improve our tool!'''
     )
