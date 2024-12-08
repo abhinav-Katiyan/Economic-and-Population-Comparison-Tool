@@ -105,14 +105,22 @@ country_names = {
     'PRY': 'Paraguay', 'PER': 'Peru', 'URY': 'Uruguay', 'YEM': 'Yemen', 'JOR': 'Jordan', 'MAR': 'Morocco',
     'OMN': 'Oman', 'QAT': 'Qatar', 'SYR': 'Syria'
 }
+TRADE_INDICATORS = {
+    'Imports': 'NE.IMP.GNFS.CD',  # Imports (in current USD)
+    'Exports': 'NE.EXP.GNFS.CD'   # Exports (in current USD)
+}
 # Function to fetch trade data for a country
 def fetch_trade_data(indicator, country_code, year):
     try:
+        indicator_value = TRADE_INDICATORS.get(indicator)
+        if not indicator_value:
+            raise KeyError(f"Indicator for {indicator} not found in TRADE_INDICATORS.")
+        
         # Define the date range for the query (single year)
         data_date = datetime(year, 1, 1)
         
-        # Fetch the data
-        data = wb.get_dataframe({indicator: indicator}, country=country_code, data_date=data_date)
+        # Fetch the data from World Bank API
+        data = wb.get_dataframe({indicator_value: indicator_value}, country=country_code, data_date=data_date)
         return data
     except Exception as e:
         st.error(f"Error fetching trade data: {e}")
@@ -149,7 +157,7 @@ def plot_group_trade_comparison(data, metric):
     )
     return fig
 
-# Streamlit interface
+# Trade comparison interface
 def trade_comparison_interface():
     st.title('Global Trade Data Comparison')
 
@@ -198,6 +206,7 @@ def trade_comparison_interface():
             # Visualization of group trade data
             fig = plot_group_trade_comparison(group_trade_data_sorted, metric)
             st.plotly_chart(fig)
+
 ############
 
 
