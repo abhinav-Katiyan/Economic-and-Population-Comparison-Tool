@@ -3,7 +3,6 @@ import wbgapi as wb
 import pandas as pd
 import plotly.graph_objects as go
 import plotly.express as px
-from datetime import datetime
 
 COUNTRY_CODES = {
     'BRA': 'Brazil', 'RUS': 'Russia', 'IND': 'India', 'CHN': 'China', 'ZAF': 'South Africa',
@@ -105,109 +104,8 @@ country_names = {
     'PRY': 'Paraguay', 'PER': 'Peru', 'URY': 'Uruguay', 'YEM': 'Yemen', 'JOR': 'Jordan', 'MAR': 'Morocco',
     'OMN': 'Oman', 'QAT': 'Qatar', 'SYR': 'Syria'
 }
-TRADE_INDICATORS = {
-    'Imports': 'NE.IMP.GNFS.CD',  # Imports (in current USD)
-    'Exports': 'NE.EXP.GNFS.CD'   # Exports (in current USD)
-}
-# Function to fetch trade data for a country
-def fetch_trade_data(indicator, country_code, year):
-    try:
-        indicator_value = TRADE_INDICATORS.get(indicator)
-        if not indicator_value:
-            raise KeyError(f"Indicator for {indicator} not found in TRADE_INDICATORS.")
-        
-        # Define the date range for the query (single year)
-        data_date = datetime(year, 1, 1)
-        
-        # Fetch the data from World Bank API
-        data = wb.get_dataframe({indicator_value: indicator_value}, country=country_code, data_date=data_date)
-        return data
-    except Exception as e:
-        st.error(f"Error fetching trade data: {e}")
-        return pd.DataFrame()
 
-# Function to fetch trade data for a group of countries
-def fetch_group_trade_data(indicator, group_countries, year):
-    trade_data = {}
-    for country_code in group_countries:
-        country_data = fetch_trade_data(indicator, country_code, year)
-        if not country_data.empty:
-            trade_data[country_code] = country_data
-    return pd.DataFrame(trade_data)
 
-# Function to create a bar chart for trade comparison between countries
-def plot_trade_comparison(data, metric):
-    fig = go.Figure(data=[go.Bar(x=data.index, y=data[TRADE_INDICATORS[metric]], text=data[TRADE_INDICATORS[metric]], textposition='auto')])
-    fig.update_layout(
-        title=f'Top Countries by {metric}', 
-        xaxis_title='Countries', 
-        yaxis_title=f'{metric} (USD)',
-        template='plotly_dark'
-    )
-    return fig
-
-# Function to create a bar chart for group trade comparison
-def plot_group_trade_comparison(data, metric):
-    fig = go.Figure(data=[go.Bar(x=data.index, y=data.values, text=data.values, textposition='auto')])
-    fig.update_layout(
-        title=f'Trade Comparison for Group by {metric}', 
-        xaxis_title='Countries', 
-        yaxis_title=f'{metric} (USD)',
-        template='plotly_dark'
-    )
-    return fig
-
-# Trade comparison interface
-def trade_comparison_interface():
-    st.title('Global Trade Data Comparison')
-
-    # Sidebar for analysis selection
-    analysis_type = st.sidebar.radio('Select Analysis Type', ['Country Comparison', 'Group Comparison'])
-
-    # Sidebar for selecting metric (Imports/Exports)
-    metric = st.sidebar.selectbox('Select Metric', ['Imports', 'Exports'])
-
-    # Sidebar for selecting country or group
-    if analysis_type == 'Country Comparison':
-        selected_country_code = st.sidebar.selectbox('Select Country:', list(COUNTRY_CODES.keys()), format_func=lambda code: COUNTRY_CODES[code])
-        year = st.sidebar.slider('Select Year:', 1990, 2023, 2023)
-
-        # Fetch data for the selected country
-        country_trade_data = fetch_trade_data(TRADE_INDICATORS[metric], selected_country_code, year)
-        if not country_trade_data.empty:
-            st.subheader(f'{metric} Comparison for {COUNTRY_CODES[selected_country_code]}')
-            st.write(country_trade_data)
-
-            # Display top 10 countries for trade comparison
-            country_trade_data_sorted = country_trade_data.sort_values(by=TRADE_INDICATORS[metric], ascending=False).head(10)
-            st.subheader('Top 10 Countries for Trade')
-            st.write(country_trade_data_sorted)
-
-            # Visualization of top 10 countries
-            fig = plot_trade_comparison(country_trade_data_sorted, metric)
-            st.plotly_chart(fig)
-
-    elif analysis_type == 'Group Comparison':
-        selected_group_name = st.sidebar.selectbox('Select Group:', list(GROUPS.keys()))
-        group_countries = GROUPS[selected_group_name]
-        year = st.sidebar.slider('Select Year:', 1990, 2023, 2023)
-
-        # Fetch group trade data
-        group_trade_data = fetch_group_trade_data(TRADE_INDICATORS[metric], group_countries, year)
-        if not group_trade_data.empty:
-            st.subheader(f'{metric} Comparison for {selected_group_name}')
-            st.write(group_trade_data)
-
-            # Display top 10 countries in the group for trade comparison
-            group_trade_data_sorted = group_trade_data.sum(axis=1).sort_values(ascending=False).head(10)
-            st.subheader('Top 10 Countries in Group for Trade')
-            st.write(group_trade_data_sorted)
-
-            # Visualization of group trade data
-            fig = plot_group_trade_comparison(group_trade_data_sorted, metric)
-            st.plotly_chart(fig)
-
-############
 
 
 def fetch_per_capita_income(years, countries):
@@ -685,7 +583,6 @@ def main():
         'Per Capita Income': 'NY.GDP.PCAP.CD'
     }
     selected_indicator = metric_indicators[metric]
-    trade_comparison_interface()  # This will call the trade comparison function
 
     if analysis_type == 'Group Comparison':
         # Group comparison
@@ -762,7 +659,6 @@ def main():
         st.subheader(f'{metric} Comparison between {selected_group_name_1} and {selected_group_name_2}')
         plot_group_vs_group(selected_group_name_1, selected_group_name_2, group_data_1, group_data_2, metric,
                             chart_type)
-
 
 if __name__ == "__main__":
     main()
