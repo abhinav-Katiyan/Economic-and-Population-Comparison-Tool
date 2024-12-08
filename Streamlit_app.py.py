@@ -3,6 +3,7 @@ import wbgapi as wb
 import pandas as pd
 import plotly.graph_objects as go
 import plotly.express as px
+from datetime import datetime
 
 COUNTRY_CODES = {
     'BRA': 'Brazil', 'RUS': 'Russia', 'IND': 'India', 'CHN': 'China', 'ZAF': 'South Africa',
@@ -104,15 +105,14 @@ country_names = {
     'PRY': 'Paraguay', 'PER': 'Peru', 'URY': 'Uruguay', 'YEM': 'Yemen', 'JOR': 'Jordan', 'MAR': 'Morocco',
     'OMN': 'Oman', 'QAT': 'Qatar', 'SYR': 'Syria'
 }
-
-TRADE_INDICATORS = {
-    'Imports': 'NE.IMP.GNFS.CD',  # Imports (in current USD)
-    'Exports': 'NE.EXP.GNFS.CD'   # Exports (in current USD)
-}
 # Function to fetch trade data for a country
 def fetch_trade_data(indicator, country_code, year):
     try:
-        data = wb.get_dataframe({indicator: wb.macro.get(indicator)}, country=country_code, data_date=year)
+        # Define the date range for the query (single year)
+        data_date = datetime(year, 1, 1)
+        
+        # Fetch the data
+        data = wb.get_dataframe({indicator: indicator}, country=country_code, data_date=data_date)
         return data
     except Exception as e:
         st.error(f"Error fetching trade data: {e}")
@@ -126,6 +126,30 @@ def fetch_group_trade_data(indicator, group_countries, year):
         if not country_data.empty:
             trade_data[country_code] = country_data
     return pd.DataFrame(trade_data)
+
+# Function to create a bar chart for trade comparison between countries
+def plot_trade_comparison(data, metric):
+    fig = go.Figure(data=[go.Bar(x=data.index, y=data[TRADE_INDICATORS[metric]], text=data[TRADE_INDICATORS[metric]], textposition='auto')])
+    fig.update_layout(
+        title=f'Top Countries by {metric}', 
+        xaxis_title='Countries', 
+        yaxis_title=f'{metric} (USD)',
+        template='plotly_dark'
+    )
+    return fig
+
+# Function to create a bar chart for group trade comparison
+def plot_group_trade_comparison(data, metric):
+    fig = go.Figure(data=[go.Bar(x=data.index, y=data.values, text=data.values, textposition='auto')])
+    fig.update_layout(
+        title=f'Trade Comparison for Group by {metric}', 
+        xaxis_title='Countries', 
+        yaxis_title=f'{metric} (USD)',
+        template='plotly_dark'
+    )
+    return fig
+
+# Streamlit interface
 def trade_comparison_interface():
     st.title('Global Trade Data Comparison')
 
@@ -174,29 +198,6 @@ def trade_comparison_interface():
             # Visualization of group trade data
             fig = plot_group_trade_comparison(group_trade_data_sorted, metric)
             st.plotly_chart(fig)
-# Function to create a bar chart for trade comparison between countries
-def plot_trade_comparison(data, metric):
-    fig = go.Figure(data=[go.Bar(x=data.index, y=data[TRADE_INDICATORS[metric]], text=data[TRADE_INDICATORS[metric]], textposition='auto')])
-    fig.update_layout(
-        title=f'Top Countries by {metric}', 
-        xaxis_title='Countries', 
-        yaxis_title=f'{metric} (USD)',
-        template='plotly_dark'
-    )
-    return fig
-
-# Function to create a bar chart for group trade comparison
-def plot_group_trade_comparison(data, metric):
-    fig = go.Figure(data=[go.Bar(x=data.index, y=data.values, text=data.values, textposition='auto')])
-    fig.update_layout(
-        title=f'Trade Comparison for Group by {metric}', 
-        xaxis_title='Countries', 
-        yaxis_title=f'{metric} (USD)',
-        template='plotly_dark'
-    )
-    return fig
-
-
 ############
 
 
